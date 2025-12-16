@@ -87,7 +87,7 @@ function App() {
       if (dataUrl) {
         const link = document.createElement('a');
         link.href = dataUrl;
-        link.download = `nexus-threads-${designState.theme.toLowerCase()}-design.png`;
+        link.download = `creatorlab-${designState.theme.toLowerCase()}-design.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -105,8 +105,8 @@ function App() {
               <Shirt className="w-5 h-5" />
             </div>
             <div>
-              <div className="logo-text">Nexus Threads</div>
-              <div className="logo-tagline">AI Fashion Designer</div>
+              <div className="logo-text">CreatorLab</div>
+              <div className="logo-tagline">by Aiorra</div>
             </div>
           </div>
         </div>
