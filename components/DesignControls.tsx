@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Theme, DesignState, ShirtSize, SleeveLength, FabricType } from '../types';
-import { Wand2, Loader2, ShoppingCart, Sparkles, BrainCircuit, Scissors, Layers, Download, Truck, Shield, Star, AlertCircle } from 'lucide-react';
+import { Wand2, Loader2, ShoppingCart, Sparkles, BrainCircuit, Scissors, Layers, Download, Truck, Shield, Star, AlertCircle, Upload, X } from 'lucide-react';
 
 interface DesignControlsProps {
     state: DesignState;
@@ -9,6 +9,7 @@ interface DesignControlsProps {
     onGenerateDescription: () => void;
     onEnhancePrompt: () => void;
     onDownload: () => void;
+    onUploadImage: (imageData: string | null) => void;
     isGeneratingDescription: boolean;
     isEnhancing: boolean;
     error?: string | null;
@@ -32,10 +33,35 @@ const DesignControls: React.FC<DesignControlsProps> = ({
     onGenerateDescription,
     onEnhancePrompt,
     onDownload,
+    onUploadImage,
     isGeneratingDescription,
     isEnhancing,
     error
 }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result as string;
+                onUploadImage(result);
+            };
+            reader.readAsDataURL(file);
+        }
+        // Reset input so the same file can be selected again
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleRemoveUpload = () => {
+        onUploadImage(null);
+    };
 
     return (
         <div className="controls-panel">
@@ -127,6 +153,44 @@ const DesignControls: React.FC<DesignControlsProps> = ({
                             )}
                         </button>
                     </div>
+                </div>
+
+                {/* Upload Your Own Image */}
+                <div className="section">
+                    <label className="section-label">Or Upload Your Own Image</label>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileSelect}
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        id="upload-image-input"
+                    />
+                    {state.generatedImageBase64 && state.uploadedImage ? (
+                        <div className="upload-preview">
+                            <img
+                                src={state.generatedImageBase64}
+                                alt="Uploaded design"
+                                className="upload-preview-image"
+                            />
+                            <button
+                                onClick={handleRemoveUpload}
+                                className="upload-remove-btn"
+                                title="Remove uploaded image"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="upload-btn"
+                        >
+                            <Upload className="w-5 h-5" />
+                            Upload Image
+                        </button>
+                    )}
+                    <p className="upload-hint">PNG, JPG or WebP • Best results with transparent background</p>
                 </div>
 
                 {/* 3. Product Options */}

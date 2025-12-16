@@ -33,6 +33,7 @@ export interface DesignState {
   theme: Theme;
   prompt: string;
   generatedImageBase64: string | null;
+  uploadedImage: boolean;
   isGenerating: boolean;
   shirtColor: string;
   size: ShirtSize;

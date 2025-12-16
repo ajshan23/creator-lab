@@ -10,6 +10,7 @@ function App() {
     theme: Theme.CYBERPUNK,
     prompt: '',
     generatedImageBase64: null,
+    uploadedImage: false,
     isGenerating: false,
     shirtColor: DEFAULT_SHIRT_COLOR,
     size: ShirtSize.L,
@@ -64,11 +65,19 @@ function App() {
     setError(null);
     try {
       const imageBase64 = await generateTShirtDesign(designState.theme, designState.prompt, designState.shirtColor);
-      updateState({ generatedImageBase64: imageBase64, isGenerating: false });
+      updateState({ generatedImageBase64: imageBase64, uploadedImage: false, isGenerating: false });
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to generate design. Please try again.");
       updateState({ isGenerating: false });
+    }
+  };
+
+  const handleUploadImage = (imageData: string | null) => {
+    if (imageData) {
+      updateState({ generatedImageBase64: imageData, uploadedImage: true });
+    } else {
+      updateState({ generatedImageBase64: null, uploadedImage: false });
     }
   };
 
@@ -132,6 +141,7 @@ function App() {
           onGenerateDescription={handleAutoDescription}
           onEnhancePrompt={handleEnhancePrompt}
           onDownload={handleDownload}
+          onUploadImage={handleUploadImage}
           isGeneratingDescription={isGeneratingDescription}
           isEnhancing={isEnhancing}
           error={error}
