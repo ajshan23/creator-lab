@@ -2,8 +2,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { Theme } from "../types";
 
-const GEMINI_API_KEY = process.env.API_KEY || '';
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const GEMINI_API_KEY = import.meta.env.VITE_API_KEY || '';
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
 
 // Initialize the client
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
