@@ -190,10 +190,22 @@ const ThreeViewer = forwardRef<ThreeViewerRef, ThreeViewerProps>(({ shirtColor, 
 
     // --- 3. SLEEVES ---
     if (sleeveLength !== 'Sleeveless') {
-      const isLong = sleeveLength === 'Long Sleeve';
-      const sleeveLen = isLong ? 1.6 : 0.6;
+      // Calculate sleeve length and taper based on type
+      let sleeveLen = 0.6;  // Default: Short
+      let sleeveRadBot = 0.2;
+
+      if (sleeveLength === 'Half Sleeve') {
+        sleeveLen = 0.9;
+        sleeveRadBot = 0.18;
+      } else if (sleeveLength === '3/4 Sleeve') {
+        sleeveLen = 1.2;
+        sleeveRadBot = 0.16;
+      } else if (sleeveLength === 'Long Sleeve') {
+        sleeveLen = 1.6;
+        sleeveRadBot = 0.15;
+      }
+
       const sleeveRadTop = 0.22;
-      const sleeveRadBot = isLong ? 0.15 : 0.2; // Taper more for long
 
       // Left Arm
       const armGeo = new THREE.CylinderGeometry(sleeveRadTop, sleeveRadBot, sleeveLen, 32);

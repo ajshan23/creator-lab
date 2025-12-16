@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Theme, DesignState, ShirtSize, SleeveLength, FabricType } from '../types';
-import { Wand2, Loader2, ShoppingCart, Sparkles, BrainCircuit, Scissors, Layers, Download, Truck, Shield, Star, AlertCircle, Upload, X } from 'lucide-react';
+import { Wand2, Loader2, ShoppingCart, Sparkles, BrainCircuit, Scissors, Layers, Download, Truck, Shield, Star, AlertCircle, Upload, X, Image } from 'lucide-react';
+import { usePixabaySearch, PixabayImage } from '../services/pixabayService';
 
 interface DesignControlsProps {
     state: DesignState;
@@ -40,6 +41,9 @@ const DesignControls: React.FC<DesignControlsProps> = ({
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Pixabay image suggestions
+    const { images: pixabaySuggestions, isLoading: isPixabayLoading } = usePixabaySearch(state.prompt);
+
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -61,6 +65,21 @@ const DesignControls: React.FC<DesignControlsProps> = ({
 
     const handleRemoveUpload = () => {
         onUploadImage(null);
+    };
+
+    const handlePixabayImageSelect = async (image: PixabayImage) => {
+        try {
+            const response = await fetch(image.webformatURL);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result as string;
+                onUploadImage(result);
+            };
+            reader.readAsDataURL(blob);
+        } catch (err) {
+            console.error('Failed to load Pixabay image:', err);
+        }
     };
 
     return (
@@ -134,6 +153,36 @@ const DesignControls: React.FC<DesignControlsProps> = ({
                             rows={3}
                         />
                     </div>
+
+                    {/* Pixabay Image Suggestions */}
+                    {state.prompt.trim().length >= 3 && (
+                        <div className="pexels-suggestions">
+                            <div className="pexels-header">
+                                <Image className="w-4 h-4" />
+                                <span>Image Suggestions</span>
+                                {isPixabayLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                            </div>
+                            {pixabaySuggestions.length > 0 ? (
+                                <div className="pexels-grid">
+                                    {pixabaySuggestions.map((image) => (
+                                        <button
+                                            key={image.id}
+                                            onClick={() => handlePixabayImageSelect(image)}
+                                            className="pexels-image-btn"
+                                            title={`Photo by ${image.user} - Click to use`}
+                                        >
+                                            <img src={image.previewURL} alt={image.tags || 'Pixabay photo'} />
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : !isPixabayLoading && (
+                                <p className="pexels-empty">No images found. Try a different description.</p>
+                            )}
+                            <p className="pexels-credit">
+                                Photos provided by <a href="https://pixabay.com" target="_blank" rel="noopener noreferrer">Pixabay</a>
+                            </p>
+                        </div>
+                    )}
                     <div style={{ marginTop: '12px' }}>
                         <button
                             onClick={onGenerateArt}
@@ -241,6 +290,17 @@ const DesignControls: React.FC<DesignControlsProps> = ({
                                 title={color.name}
                             />
                         ))}
+                        {/* Custom Color Picker */}
+                        <div className="custom-color-picker">
+                            <input
+                                type="color"
+                                value={state.shirtColor}
+                                onChange={(e) => updateState({ shirtColor: e.target.value })}
+                                className="color-input"
+                                title="Pick custom color"
+                            />
+                            <span className="custom-color-label">Custom</span>
+                        </div>
                     </div>
                 </div>
 

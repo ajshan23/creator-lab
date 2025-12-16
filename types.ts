@@ -20,6 +20,8 @@ export enum ShirtSize {
 export enum SleeveLength {
   SLEEVELESS = 'Sleeveless',
   SHORT = 'Short Sleeve',
+  HALF = 'Half Sleeve',
+  THREE_QUARTER = '3/4 Sleeve',
   LONG = 'Long Sleeve'
 }
 

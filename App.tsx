@@ -101,14 +101,12 @@ function App() {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <div className="logo-icon">
-              <Shirt className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="logo-text">CreatorLab</div>
-              <div className="logo-tagline">by Aiorra</div>
-            </div>
+            <img src="/logo.png" alt="Aiorra Logo" className="logo-image" />
+            <span className="logo-text">CreatorLab</span>
           </div>
+          <a href="https://aiorra.com" className="back-btn" target="_blank" rel="noopener noreferrer">
+            ← Back to Aiorra
+          </a>
         </div>
       </header>
 
