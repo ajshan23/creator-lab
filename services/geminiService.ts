@@ -78,7 +78,7 @@ const hexToColorName = (hex: string): string => {
 
 /**
  * Generates the actual image based on the user's prompt and theme.
- * Uses OpenAI DALL-E 3 via our API route (to bypass CORS in production).
+ * Uses OpenAI DALL-E 3 via our API route.
  */
 export const generateTShirtDesign = async (theme: Theme, userPrompt: string, shirtColorHex: string): Promise<string> => {
   const colorName = hexToColorName(shirtColorHex);
@@ -92,68 +92,26 @@ IMPORTANT: Generate ONLY the graphic/artwork itself - do NOT include any T-shirt
 CRITICAL: The background MUST be a solid, flat, uniform ${colorName} color (hex: ${shirtColorHex}). No gradients, no patterns, no textures - just a pure solid ${colorName} background filling the entire image behind the artwork.`;
 
   try {
-    // Use API route in production, direct call in development
-    const isProduction = typeof window !== 'undefined' &&
-      !window.location.hostname.includes('localhost') &&
-      !window.location.hostname.includes('127.0.0.1');
+    // Always use API route
+    const response = await fetch('/api/generate-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: fullPrompt,
+        size: '1024x1024',
+        quality: 'hd',
+      }),
+    });
 
-    if (isProduction) {
-      // Call our serverless API route
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: fullPrompt,
-          size: '1024x1024',
-          quality: 'hd',
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData?.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.image;
-    } else {
-      // Direct OpenAI call for local development
-      if (!OPENAI_API_KEY) {
-        throw new Error("OpenAI API Key is missing. Please set the VITE_OPENAI_API_KEY environment variable.");
-      }
-
-      const response = await fetch('https://api.openai.com/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'dall-e-3',
-          prompt: fullPrompt,
-          n: 1,
-          size: '1024x1024',
-          response_format: 'b64_json',
-          quality: 'hd',
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
-        throw new Error(`OpenAI API Error: ${errorMessage}`);
-      }
-
-      const data = await response.json();
-
-      if (data.data && data.data.length > 0 && data.data[0].b64_json) {
-        return `data:image/png;base64,${data.data[0].b64_json}`;
-      }
-
-      throw new Error("No image data returned from OpenAI. Please try a different prompt.");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData?.error || `HTTP ${response.status}: ${response.statusText}`);
     }
+
+    const data = await response.json();
+    return data.image;
   } catch (error: any) {
     console.error("OpenAI Image Generation Error:", error);
     throw error;
